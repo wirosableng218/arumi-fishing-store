@@ -100,7 +100,7 @@ function App() {
     return saved ? JSON.parse(saved) : defaultProducts;
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('idle'); // idle | paying | success | pending | failed | cancelled
   const [statusMessage, setStatusMessage] = useState('');
   const [lastSnapToken, setLastSnapToken] = useState(null);
@@ -251,6 +251,11 @@ function App() {
     alert('Sistem pembayaran sedang maintenance. Silakan hubungi kami langsung untuk pemesanan.');
   };
 
+  const handleCheckout = () => {
+    // Midtrans checkout removed for security
+    alert('Sistem pembayaran sedang maintenance. Silakan hubungi kami langsung untuk pemesanan.');
+  };
+
   const scrollToProducts = () => {
     const el = document.getElementById('products');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -348,6 +353,10 @@ function App() {
               src="/arumi-logo.png"
               alt="Arumi Fishing Logo"
               className="brand-logo"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.style.display = 'none';
+              }}
             />
             <span>Arumi Fishing Store</span>
           </div>

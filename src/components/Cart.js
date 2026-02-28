@@ -6,25 +6,16 @@ const Cart = ({ cart, setCart, products, onBackToHome, onCheckout }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
 
   const generateWhatsAppMessage = () => {
-    const cartItems = Object.entries(cart)
-      .filter(([_, qty]) => qty > 0)
-      .map(([productId, qty]) => {
-        const product = products.find((p) => p.id === Number(productId));
-        return product ? `• ${product.name} (${qty}x) - Rp ${(product.price * qty).toLocaleString()}` : '';
-      })
-      .filter(item => item);
+    if (cartItems.length === 0) return '';
 
-    const totals = calculateTotals(Object.entries(cart)
-      .filter(([_, qty]) => qty > 0)
-      .map(([productId, qty]) => {
-        const product = products.find((p) => p.id === Number(productId));
-        return { ...product, quantity: qty, total: product.price * qty };
-      }));
+    const items = cartItems.map(item => 
+      `${item.quantity}x ${item.name} - Rp ${(item.price * item.quantity).toLocaleString()}`
+    ).join('\n');
 
     const message = `🎣 *PESANAN PRODUK ARUMI FISHING* 🎣
 
 %0A📋 *Detail Pesanan:*
-%0A${cartItems.join('%0A')}
+%0A${items}
 %0A💰 *Total Pembayaran: Rp ${totals.finalTotal.toLocaleString()}*
 %0A📦 *Total Item: ${totals.totalUnits}*
 %0A${totals.discountAmount > 0 ? `🎁 *Diskon: Rp ${totals.discountAmount.toLocaleString()}*` : ''}
@@ -35,6 +26,32 @@ const Cart = ({ cart, setCart, products, onBackToHome, onCheckout }) => {
 %0A%0A🙏 Mohon konfirmasi ketersediaan stok dan total biaya pengiriman. Terima kasih!`;
 
     return message;
+  };
+
+  const generateEmailSubject = () => {
+    return `Pesanan Arumi Fishing Store - ${cartItems.length} Item - Rp ${totals.total.toLocaleString()}`;
+  };
+
+  const generateEmailBody = () => {
+    if (cartItems.length === 0) return '';
+
+    const items = cartItems.map(item => 
+      `${item.quantity}x ${item.name} - Rp ${(item.price * item.quantity).toLocaleString()}`
+    ).join('\n');
+
+    return `Halo Arumi Fishing Store,
+
+Saya ingin memesan produk berikut:
+
+${items}
+
+Total: Rp ${totals.total.toLocaleString()}
+
+Mohon informasikan ketersediaan produk dan cara pembayaran.
+
+Terima kasih!
+[Nama Pelanggan]
+[No. Telepon/WhatsApp]`;
   };
 
   const handleBuyViaWhatsApp = () => {

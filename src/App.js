@@ -439,10 +439,6 @@ function App() {
 
       <header
         className="hero"
-        style={{
-          // Use public asset without bundler resolving it
-          '--hero-watermark-image': "url('/arumi-logo.png')",
-        }}
       >
         <div className="container hero-inner">
           <div className="hero-content">

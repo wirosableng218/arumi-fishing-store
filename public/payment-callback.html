@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Transaksi - Arumi Fishing Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-block-size: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-inline-size: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-block-end: 20px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .success {
+            color: #27ae60;
+        }
+
+        .pending {
+            color: #f39c12;
+        }
+
+        .failed {
+            color: #e74c3c;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-block-end: 15px;
+            font-weight: 700;
+        }
+
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-block: 25px;
+            text-align: start;
+        }
+
+        .order-info p {
+            margin-block: 10px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .order-info strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .message {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-block-end: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.3);
+        }
+
+        .countdown {
+            margin-block-start: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: inline-block;
+            inline-size: 20px;
+            block-size: 20px;
+            border: 3px solid #f3f3f3;
+            border-block-start: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-inline-end: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-inline-size: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                inline-size: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="content">
+        <div class="loading"></div>
+        <p>Memproses data transaksi...</p>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+        const statusCode = urlParams.get('status_code');
+        const transactionStatus = urlParams.get('transaction_status');
+
+        // Countdown timer
+        let countdown = 10;
+        let countdownInterval;
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'capture':
+                case 'settlement':
+                    return '✅';
+                case 'pending':
+                    return '⏳';
+                case 'deny':
+                case 'expire':
+                case 'cancel':
+                    return '❌';
+                default:
+                    return 'ℹ️';
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'capture':
+                case 'settlement':
+                    return 'success';
+                case 'pending':
+                    return 'pending';
+                case 'deny':
+                case 'expire':
+                case 'cancel':
+                    return 'failed';
+                default:
+                    return 'pending';
+            }
+        }
+
+        function getStatusTitle(status) {
+            switch (status) {
+                case 'capture':
+                case 'settlement':
+                    return 'Transaksi Berhasil!';
+                case 'pending':
+                    return 'Menunggu Pembayaran';
+                case 'deny':
+                    return 'Transaksi Ditolak';
+                case 'expire':
+                    return 'Transaksi Kadaluarsa';
+                case 'cancel':
+                    return 'Transaksi Dibatalkan';
+                default:
+                    return 'Status Transaksi';
+            }
+        }
+
+        function getStatusMessage(status) {
+            switch (status) {
+                case 'capture':
+                case 'settlement':
+                    return 'Pembayaran Anda telah berhasil diproses. Pesanan akan segera kami kirim. Terima kasih atas kepercayaan Anda!';
+                case 'pending':
+                    return 'Pembayaran Anda sedang menunggu konfirmasi. Silakan selesaikan pembayaran sesuai instruksi yang diberikan.';
+                case 'deny':
+                    return 'Pembayaran Anda ditolak. Silakan hubungi bank atau coba metode pembayaran lain.';
+                case 'expire':
+                    return 'Waktu pembayaran telah habis. Silakan lakukan pemesanan ulang.';
+                case 'cancel':
+                    return 'Transaksi telah dibatalkan. Jika ini bukan tindakan Anda, silakan hubungi customer service.';
+                default:
+                    return 'Status transaksi Anda sedang diproses.';
+            }
+        }
+
+        function redirectToHome() {
+            window.location.href = '/';
+        }
+
+        function closeWindow() {
+            // Try to close the window
+            window.close();
+
+            // If window.close() doesn't work (some browsers block it)
+            setTimeout(() => {
+                // Show message that window can be closed manually
+                document.getElementById('content').innerHTML = `
+                    <div class="icon">👋</div>
+                    <h1>Terima Kasih!</h1>
+                    <p class="message">Anda dapat menutup halaman ini sekarang.</p>
+                    <p style="color: #95a5a6; font-size: 14px; margin-block-start: 20px;">
+                        Jika halaman tidak tertutup otomatis, silakan tutup secara manual.
+                    </p>
+                `;
+            }, 500);
+        }
+
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                countdown--;
+                const countdownEl = document.getElementById('countdown');
+                if (countdownEl) {
+                    countdownEl.textContent = countdown;
+                }
+
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    closeWindow();
+                }
+            }, 1000);
+        }
+
+        // Display transaction status
+        function displayStatus() {
+            const icon = getStatusIcon(transactionStatus);
+            const statusClass = getStatusClass(transactionStatus);
+            const title = getStatusTitle(transactionStatus);
+            const message = getStatusMessage(transactionStatus);
+
+            const content = `
+                <div class="icon ${statusClass}">${icon}</div>
+                <h1>${title}</h1>
+                <p class="message">${message}</p>
+                
+                <div class="order-info">
+                    <p><strong>Order ID:</strong> ${orderId || 'N/A'}</p>
+                    <p><strong>Status Code:</strong> ${statusCode || 'N/A'}</p>
+                    <p><strong>Status Transaksi:</strong> ${transactionStatus || 'N/A'}</p>
+                    <p><strong>Waktu:</strong> ${new Date().toLocaleString('id-ID')}</p>
+                </div>
+
+                <p style="color: #2c3e50; font-weight: 600; margin-block-end: 20px;">
+                    Apakah Anda ingin kembali ke halaman website?
+                </p>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="redirectToHome()">
+                        🏠 Kembali ke Website
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeWindow()">
+                        ✖️ Tutup Halaman
+                    </button>
+                </div>
+
+                <div class="countdown">
+                    Halaman akan tertutup otomatis dalam <span id="countdown">${countdown}</span> detik
+                </div>
+            `;
+
+            document.getElementById('content').innerHTML = content;
+
+            // Start countdown for auto-close
+            startCountdown();
+        }
+
+        // Execute on page load
+        window.onload = function () {
+            // Small delay for better UX
+            setTimeout(displayStatus, 500);
+        };
+    </script>
+</body>
+
+</html>

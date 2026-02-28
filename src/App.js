@@ -351,12 +351,17 @@ function App() {
           <div className="brand">
             <img
               src="/arumi-logo.png"
-              alt="Arumi Fishing Logo"
+              alt="Arumi Fishing Store Logo"
               className="brand-logo"
+              onLoad={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.style.display = 'none';
+                console.error('Logo failed to load');
               }}
+              style={{ opacity: '0', transition: 'opacity 0.3s ease' }}
             />
             <span>Arumi Fishing Store</span>
           </div>

@@ -1,7 +1,6 @@
 .cart-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%),
-              url('/arumi-logo.png') center/20% no-repeat;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
   background-attachment: fixed;
   padding: var(--space-8) 0;
 }
